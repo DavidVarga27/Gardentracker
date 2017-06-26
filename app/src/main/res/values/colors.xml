@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FFD4AA</color>
+    <color name="colorPrimaryDark">#d96c00</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="biela">#ffffff</color>
+    <color name="siva">#999966</color>
+    <color name="zakladHneda">#EA7500</color>
+
+</resources>
