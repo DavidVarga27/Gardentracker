@@ -48,4 +48,16 @@ public interface Contract {
                 .appendPath(TABLE_NAME)
                 .build();
     }
+
+    interface Settings extends BaseColumns {
+        String TABLE_NAME = "settings";
+        String NOTIFICATION_TIME = "notification_time";
+        String AUTHORITY = "sk.upjs.ics.android.gardentracker";
+
+        Uri CONTENT_URI = new Uri.Builder()
+                .scheme(SCHEME_CONTENT)
+                .authority(AUTHORITY)
+                .appendPath(TABLE_NAME)
+                .build();
+    }
 }

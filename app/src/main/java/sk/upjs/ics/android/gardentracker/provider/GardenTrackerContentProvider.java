@@ -41,6 +41,11 @@ public class GardenTrackerContentProvider extends ContentProvider {
                     NO_SELECTION, NO_SELECTION_ARGS, NO_GROUP_BY, NO_HAVING, NO_SORT_ORDER);
             cursor.setNotificationUri(getContext().getContentResolver(), Contract.Weather.CONTENT_URI);
             return cursor;
+        }else if (uri.toString().equals(Contract.Settings.CONTENT_URI.toString())) {
+            Cursor cursor = db.query(Contract.Settings.TABLE_NAME, ALL_COLUMNS,
+                    NO_SELECTION, NO_SELECTION_ARGS, NO_GROUP_BY, NO_HAVING, NO_SORT_ORDER);
+            cursor.setNotificationUri(getContext().getContentResolver(), Contract.Settings.CONTENT_URI);
+            return cursor;
         }
         return null;
     }
@@ -61,6 +66,10 @@ public class GardenTrackerContentProvider extends ContentProvider {
             long id = db.insert(Contract.Weather.TABLE_NAME, NO_NULL_COLUMN_HACK, values);
             getContext().getContentResolver().notifyChange(Contract.Weather.CONTENT_URI, NO_CONTENT_OBSERVER);
             return Uri.withAppendedPath(Contract.Weather.CONTENT_URI, String.valueOf(id));
+        }else if(uri.toString().equals(Contract.Settings.CONTENT_URI.toString())) {
+            long id = db.insert(Contract.Settings.TABLE_NAME, NO_NULL_COLUMN_HACK, values);
+            getContext().getContentResolver().notifyChange(Contract.Settings.CONTENT_URI, NO_CONTENT_OBSERVER);
+            return Uri.withAppendedPath(Contract.Settings.CONTENT_URI, String.valueOf(id));
         }
 
         return null;
@@ -116,6 +125,13 @@ public class GardenTrackerContentProvider extends ContentProvider {
             selection = "_id = ?";
             int affectedRows = db.update(Contract.Weather.TABLE_NAME,values,selection,whereArgs);
             getContext().getContentResolver().notifyChange(Contract.Weather.CONTENT_URI,NO_CONTENT_OBSERVER);
+            return affectedRows;
+        }else if(uriWithouId.equals(Contract.Settings.CONTENT_URI.toString())) {
+            String id = uri.getLastPathSegment();
+            String[] whereArgs = { id };
+            selection = "_id = ?";
+            int affectedRows = db.update(Contract.Settings.TABLE_NAME,values,selection,whereArgs);
+            getContext().getContentResolver().notifyChange(Contract.Settings.CONTENT_URI,NO_CONTENT_OBSERVER);
             return affectedRows;
         }
 

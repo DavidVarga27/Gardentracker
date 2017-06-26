@@ -126,6 +126,14 @@ public class Uvod extends AppCompatActivity {
             }
         });
 
+        ((Button)findViewById(R.id.settingsButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Uvod.this,Settings.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Override

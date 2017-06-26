@@ -53,5 +53,7 @@
     <string name="humidity">Humidity: %d %%</string>
     <string name="sunrise">Sunrise: %s</string>
     <string name="sunset">Sunset: %s</string>
-
+    <string name="title_activity_settings">Settings</string>
+    <string name="settings">SETTINGS</string>
+    <string name="notification_time">Notification time</string>
 </resources>

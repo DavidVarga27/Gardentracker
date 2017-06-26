@@ -1,5 +1,6 @@
 package sk.upjs.ics.android.gardentracker.provider;
 
+import android.content.ContentValues;
 import android.content.Context;
 
 import android.database.sqlite.SQLiteDatabase;
@@ -26,6 +27,9 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         db.execSQL(createTableMaintenance());
         db.execSQL(createTablePhotoDiary());
         db.execSQL(createTableWeather());
+        db.execSQL(createTableSettings());
+
+        insertSettings(db);
     }
 
     private String createTableMaintenance() {
@@ -73,6 +77,23 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
                 Contract.Weather.TABLE_NAME,
                 Contract.Weather._ID,
                 Contract.Weather.CITY);
+    }
+
+    private String createTableSettings() {
+        String sqlTemplate = "CREATE TABLE %s ("
+                + "%s INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "%s INTEGER"
+                + ")";
+        return String.format(sqlTemplate,
+                Contract.Settings.TABLE_NAME,
+                Contract.Settings._ID,
+                Contract.Settings.NOTIFICATION_TIME);
+    }
+
+    private void insertSettings(SQLiteDatabase db) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contract.Settings.NOTIFICATION_TIME, 485 );
+        db.insert(Contract.Settings.TABLE_NAME, NO_NULL_COLUMN_HACK, contentValues);
     }
 
     @Override
