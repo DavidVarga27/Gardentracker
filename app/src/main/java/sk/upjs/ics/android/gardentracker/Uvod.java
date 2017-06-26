@@ -67,6 +67,8 @@ public class Uvod extends AppCompatActivity {
         notificationManager.notify("Presentr", 0, notification);
 
         Log.d("s","s");
+        Log.d("s2","s2");
+        Log.d("s","s");
     }
 
     public PendingIntent getNotificationContentIntent() {
