@@ -112,6 +112,7 @@
 
     <Button
         android:id="@+id/backButton"
+        style="@style/buttonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/back"
@@ -125,6 +126,7 @@
 
     <Button
         android:id="@+id/changeSaveButton"
+        style="@style/buttonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"

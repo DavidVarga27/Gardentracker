@@ -15,6 +15,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".Uvod"
+            android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -54,7 +55,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SearchCity"
-            android:label="@string/title_activity_weather"
+            android:label="@string/title_activity_search_city"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Weather"

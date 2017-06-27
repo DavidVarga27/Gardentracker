@@ -56,8 +56,12 @@ public class GardenMaintenance extends AppCompatActivity implements LoaderManage
                     long nextCheck = cursor.getLong(columnIndex);
                     long actualDate = System.currentTimeMillis();
                     long daysLeft = (long) Math.ceil((nextCheck - actualDate) / (24.0 * 3600 * 1000));
-                    if(daysLeft==0){
+                    if(daysLeft<0){
                         parent.setBackgroundColor(getResources().getColor(R.color.warning));
+                    }else if(daysLeft>0){
+                        parent.setBackgroundColor(getResources().getColor(R.color.zelena));
+                    }else{
+                        parent.setBackgroundColor(getResources().getColor(R.color.oranzova));
                     }
                     String days = String.format(getResources().getString(R.string.days_left), daysLeft);
                     textView.setText(days);
@@ -159,6 +163,7 @@ public class GardenMaintenance extends AppCompatActivity implements LoaderManage
 
         CursorLoader cursorLoader = new CursorLoader(this);
         cursorLoader.setUri(Contract.Maintenance.CONTENT_URI);
+        cursorLoader.setSortOrder(Contract.Maintenance.NEXT_CHECK);
         return cursorLoader;
     }
 

@@ -9,6 +9,15 @@
 
     </style>
 
+    <style name="buttonStyle">
+        <item name="android:background">@drawable/button_style</item>
+        <item name="android:textColor">@color/biela</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+
+
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

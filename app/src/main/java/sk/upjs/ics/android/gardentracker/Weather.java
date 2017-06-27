@@ -10,6 +10,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -86,12 +88,13 @@ public class Weather extends AppCompatActivity {
                         return null;
                     }
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    connection.disconnect();
+
                     StringBuilder stringBuilder = new StringBuilder();
                     String line;
                     while ((line = bufferedReader.readLine()) != null) {
                         stringBuilder.append(line + '\n');
                     }
+                    connection.disconnect();
                     return new JSONObject(stringBuilder.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -107,7 +110,7 @@ public class Weather extends AppCompatActivity {
             this.progress.dismiss();
 
             if (json == null) {
-                Toast.makeText(getApplicationContext(), "Connection error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Connection error2", Toast.LENGTH_SHORT).show();
                 return;
             }else{
 
@@ -178,4 +181,29 @@ public class Weather extends AppCompatActivity {
         DateFormat df = new SimpleDateFormat("HH:mm");
         return df.format(date);
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_uvod, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(Weather.this, Settings.class);
+            startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }
+

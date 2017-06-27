@@ -20,7 +20,10 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.GridView;
@@ -42,6 +45,9 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_diary_gallery);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         String[] from = {Contract.PhotoDiary.PHOTO};
         int[] to = {R.id.onePhotoImageView};
@@ -100,23 +106,7 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
         gridView.setAdapter(gridViewAdapter);
         getLoaderManager().initLoader(Defaults.DEFAULT_LOADER_ID, Bundle.EMPTY, this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        if(checkCameraHardware(this)){
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    try {
-                        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                        startActivityForResult(intent, CAMERA_REQUEST);
-                    }
-                    catch (Exception e) {
-                        Toast.makeText(getApplicationContext(),getResources().getString(R.string.camera_toast),Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        } else {
-            fab.setVisibility(View.INVISIBLE);
-        }
+
 
     }
 
@@ -199,5 +189,29 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         dialog.getWindow().setAttributes(lp);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_uvod, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(PhotoDiaryGallery.this, Settings.class);
+            startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

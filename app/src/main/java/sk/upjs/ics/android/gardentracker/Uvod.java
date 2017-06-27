@@ -21,7 +21,6 @@ import android.widget.Button;
 import sk.upjs.ics.android.gardentracker.provider.Contract;
 
 public class Uvod extends AppCompatActivity {
-    //TODO: zmenit stringy
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,37 +49,6 @@ public class Uvod extends AppCompatActivity {
 
 
     }
-
-    private void triggerNotification(int taskCount) {
-        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Notification notification = new Notification.Builder(this)
-                .setContentTitle("Garden maintenance")
-                .setContentText(String.format("Dnes musis spravit %d ulohy.",taskCount))
-                .setContentIntent(getNotificationContentIntent())
-                .setTicker("to co sa zobrazi hned na zaciatku")
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.spade)
-                .setSound(alarmSound)
-                .getNotification();
-
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify("Presentr", 0, notification);
-
-        Log.d("s","s");
-        Log.d("s2","s2");
-        Log.d("s","s");
-    }
-
-    public PendingIntent getNotificationContentIntent() {
-        int REQUEST_CODE = 0;
-        int NO_FLAGS = 0;
-
-        Intent intent = new Intent(getApplicationContext(), GardenMaintenance.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, REQUEST_CODE, intent, NO_FLAGS);
-        return contentIntent;
-    }
-
-
 
     @Override
     protected void onPause() {
@@ -152,7 +120,8 @@ public class Uvod extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent intent = new Intent(Uvod.this, Settings.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);

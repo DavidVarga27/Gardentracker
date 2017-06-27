@@ -37,12 +37,12 @@
     <string name="close">Close</string>
     <string name="fill_form_warning_toast">You have to fill out all fields.</string>
     <string name="fill_city_warning_toast">You have to fill out the city field.</string>
-    <string name="title_activity_photo_diary_gallery">PhotoDiaryGallery</string>
+    <string name="title_activity_photo_diary_gallery">Photo Diary Gallery</string>
     <string name="city_not_found">City was not found. Please choose another city.</string>
 
     <string name="jpg">JPG_%d</string>
     <string name="days_left">%d days left</string>
-    <string name="title_activity_photo_diary_detail">PhotoDiaryDetail</string>
+    <string name="title_activity_photo_diary_detail">Photo Diary Detail</string>
     <string name="title_activity_weather">Weather</string>
 
     <string name="weather_main" formatted="false">%d °C, %s</string>
@@ -56,7 +56,7 @@
     <string name="title_activity_settings">Settings</string>
     <string name="settings">SETTINGS</string>
     <string name="notification_time">Notification time</string>
-
+    <string name="title_activity_search_city">Search City</string>
 
 
 
@@ -64,8 +64,8 @@
     <string name="saved">Saved!</string>
     <string name="invalid_loader">Invalid loader ID %d</string>
     <plurals name="notification_text_tasks">
-        <item quantity="one">You have done %d task today.</item>
-        <item quantity="other">You have done %d tasks today.</item>
+        <item quantity="one">You have %1$d task to do today.</item>
+        <item quantity="other">You have %1$d tasks to do today.</item>
     </plurals>
     <string name="work_for_today">Work for today</string>
     <string name="connection_error">Connection error.</string>

@@ -63,7 +63,10 @@ public class NotificationService extends IntentService {
                 if (nextCheck >= startTime && nextCheck < endTime)
                     numOfTask ++;
             }
-            triggerNotification(numOfTask);
+            if(numOfTask>0){
+                triggerNotification(numOfTask);
+            }
+
         }
     }
 
@@ -77,7 +80,7 @@ public class NotificationService extends IntentService {
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Notification notification = new Notification.Builder(this)
                 .setContentTitle(getResources().getString(R.string.work_for_today))
-                .setContentText(getResources().getQuantityString(R.plurals.notification_text_tasks,taskCount))
+                .setContentText(getResources().getQuantityString(R.plurals.notification_text_tasks,taskCount,taskCount))
                 .setContentIntent(getNotificationContentIntent())
                 .setTicker(getResources().getString(R.string.app_name))
                 .setAutoCancel(true)
