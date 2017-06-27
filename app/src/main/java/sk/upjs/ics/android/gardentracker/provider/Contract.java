@@ -52,6 +52,7 @@ public interface Contract {
     interface Settings extends BaseColumns {
         String TABLE_NAME = "settings";
         String NOTIFICATION_TIME = "notification_time";
+        String LAST_NOTIFICATION_TIME = "last_notification_time";
         String AUTHORITY = "sk.upjs.ics.android.gardentracker";
 
         Uri CONTENT_URI = new Uri.Builder()

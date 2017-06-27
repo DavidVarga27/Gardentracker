@@ -2,9 +2,12 @@
 <resources>
     <color name="colorPrimary">#FFD4AA</color>
     <color name="colorPrimaryDark">#d96c00</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#EA7500</color>
     <color name="biela">#ffffff</color>
     <color name="siva">#999966</color>
     <color name="zakladHneda">#EA7500</color>
-
+    <color name="warning">#FFCDD2</color>
+    <color name="oranzova">#FFE0B2</color>
+    <color name="zelena">#C8E6C9</color>
+    <color name="yellow">#fffde7</color>
 </resources>

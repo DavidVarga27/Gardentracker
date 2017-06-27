@@ -8,6 +8,7 @@
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingTop="16dp"
+    android:background="@color/yellow"
     tools:context="sk.upjs.ics.android.gardentracker.GardenMaintenance">
 
     <ListView

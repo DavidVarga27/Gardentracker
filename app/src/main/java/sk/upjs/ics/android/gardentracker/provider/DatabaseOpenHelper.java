@@ -82,12 +82,14 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     private String createTableSettings() {
         String sqlTemplate = "CREATE TABLE %s ("
                 + "%s INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + "%s INTEGER"
+                + "%s INTEGER, "
+                + "%s LONG "
                 + ")";
         return String.format(sqlTemplate,
                 Contract.Settings.TABLE_NAME,
                 Contract.Settings._ID,
-                Contract.Settings.NOTIFICATION_TIME);
+                Contract.Settings.NOTIFICATION_TIME,
+                Contract.Settings.LAST_NOTIFICATION_TIME);
     }
 
     private void insertSettings(SQLiteDatabase db) {

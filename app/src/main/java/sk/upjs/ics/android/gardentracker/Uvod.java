@@ -45,7 +45,7 @@ public class Uvod extends AppCompatActivity {
         }.start();
 
 
-        triggerNotification(2);
+        NotificationScheduler.schedule(this);
 
 
 

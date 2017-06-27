@@ -60,7 +60,10 @@ public class GardenMaintenance extends AppCompatActivity implements LoaderManage
                         //Log.d("nacitalo sa", "z databazy");
                         long nextCheck = cursor.getLong(columnIndex);
                         long actualDate = System.currentTimeMillis();
-                        long daysLeft = (nextCheck - actualDate) / (24 * 3600 * 1000)+1;
+                        long daysLeft = (long) Math.ceil((nextCheck - actualDate) / (24.0 * 3600 * 1000));
+                        if(daysLeft==0){
+                            parent.setBackgroundColor(getResources().getColor(R.color.warning));
+                        }
                         Log.d("days",String.valueOf(daysLeft));
                         String days = String.format(getResources().getString(R.string.days_left), daysLeft);
                         textView.setText(days);
