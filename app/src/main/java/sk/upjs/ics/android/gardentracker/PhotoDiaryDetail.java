@@ -39,7 +39,7 @@ public class PhotoDiaryDetail extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_diary_detail);
 
-        //TODO: dorobit
+
         fillOutForm(savedInstanceState);
     }
 
@@ -50,17 +50,13 @@ public class PhotoDiaryDetail extends AppCompatActivity {
     private void fillOutForm(Bundle savedInstanceState){
         Intent intent = getIntent();
         position = intent.getIntExtra(getResources().getString(R.string.position),0);
-        Log.d("position",String.valueOf(position));
-
         nameEditText = (EditText) findViewById(R.id.photoNameTextView);
         timeTextView = (TextView)findViewById(R.id.photoTimeTextView);
         descriptionEditText = (EditText)findViewById(R.id.photoDescriptionEditText);
         imageView = (ImageView)findViewById(R.id.photoImageView);
 
         if (savedInstanceState == null) {
-            Log.d("nacitava sa","z db");
             String name, description;
-
             Cursor cursor = getContentResolver().query(Contract.PhotoDiary.CONTENT_URI, null, null, null, null);
             cursor.moveToPosition(position);
             id = cursor.getInt(cursor.getColumnIndex(Contract.PhotoDiary._ID));
@@ -69,25 +65,17 @@ public class PhotoDiaryDetail extends AppCompatActivity {
             description = cursor.getString(cursor.getColumnIndex(Contract.PhotoDiary.DESCRIPTION));
             long timeInMillis = cursor.getLong(cursor.getColumnIndex(Contract.PhotoDiary.DATE));
 
-
-
             BitmapFactory.Options options = new BitmapFactory.Options();
-            // options.inDither = false;
-            // options.inTempStorage = new byte[1024 *32];
             byte[] pic = cursor.getBlob(cursor.getColumnIndex(Contract.PhotoDiary.PHOTO));
-
             Bitmap bm = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
             imageView.setImageBitmap(bm);
-
 
             nameEditText.setText(name);
             timeTextView.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date(timeInMillis)));
             descriptionEditText.setText(description);
-
             nameEditText.setEnabled(false);
             descriptionEditText.setEnabled(false);
         }
-
 
         ((Button) findViewById(R.id.backButton)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +88,6 @@ public class PhotoDiaryDetail extends AppCompatActivity {
         changeSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if(getResources().getString(R.string.save).equals(changeSaveButton.getText().toString())){
                     String name = nameEditText.getText().toString();
                     String description = descriptionEditText.getText().toString();
@@ -111,16 +98,14 @@ public class PhotoDiaryDetail extends AppCompatActivity {
                         contentValues.put(Contract.PhotoDiary.NAME,name);
                         contentValues.put(Contract.PhotoDiary.DESCRIPTION, description);
                         AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
-
                             @Override
                             protected void onUpdateComplete(int token, Object cookie, int result) {
-                                Toast.makeText(PhotoDiaryDetail.this, "Updated!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(PhotoDiaryDetail.this, getResources().getString(R.string.updated), Toast.LENGTH_LONG).show();
                                 finish();
                             }
                         };
                         Uri selectedUri = ContentUris.withAppendedId(Contract.PhotoDiary.CONTENT_URI, id);
                         queryHandler.startUpdate(0, Defaults.NO_COOKIE,selectedUri,contentValues,null,null);
-
                         nameEditText.setEnabled(false);
                         descriptionEditText.setEnabled(false);
                     }

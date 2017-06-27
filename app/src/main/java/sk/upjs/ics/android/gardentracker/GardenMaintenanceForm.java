@@ -18,7 +18,7 @@ import sk.upjs.ics.android.gardentracker.provider.Contract;
 import sk.upjs.ics.android.util.Defaults;
 
 public class GardenMaintenanceForm extends AppCompatActivity {
-    //TODO: zmenit stringy
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +60,7 @@ public class GardenMaintenanceForm extends AppCompatActivity {
                     AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
                         @Override
                         protected void onInsertComplete(int token, Object cookie, Uri uri) {
-                            Toast.makeText(GardenMaintenanceForm.this, "Saved!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(GardenMaintenanceForm.this, getResources().getString(R.string.saved), Toast.LENGTH_LONG).show();
                             finish();
                         }
                     };
@@ -71,6 +71,8 @@ public class GardenMaintenanceForm extends AppCompatActivity {
         });
 
     }
+
+    //TODO: pozriet ci treba ukladanie saved instance state
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {

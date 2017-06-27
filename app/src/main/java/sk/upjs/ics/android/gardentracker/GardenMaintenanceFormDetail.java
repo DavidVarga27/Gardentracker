@@ -23,7 +23,7 @@ import sk.upjs.ics.android.gardentracker.provider.Contract;
 import sk.upjs.ics.android.util.Defaults;
 
 public class GardenMaintenanceFormDetail extends AppCompatActivity {
-    //TODO: zmenit stringy
+
     private EditText nameEditText,descriptionEditText,intervalEditText;
     private DatePicker datePicker;
     private Button changeSaveButton;
@@ -79,7 +79,7 @@ public class GardenMaintenanceFormDetail extends AppCompatActivity {
 
                             @Override
                             protected void onUpdateComplete(int token, Object cookie, int result) {
-                                Toast.makeText(GardenMaintenanceFormDetail.this, "Updated!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(GardenMaintenanceFormDetail.this, getResources().getString(R.string.updated), Toast.LENGTH_LONG).show();
                                 finish();
                             }
                         };
@@ -120,9 +120,7 @@ public class GardenMaintenanceFormDetail extends AppCompatActivity {
             interval = cursor.getInt(cursor.getColumnIndex(Contract.Maintenance.INTERVAL_IN_DAYS));
             date = cursor.getLong(cursor.getColumnIndex(Contract.Maintenance.LAST_CHECK));
             changeSaveButton = (Button) findViewById(R.id.saveButton);
-            changeSaveButton.setText("CHANGE");
-
-            Log.d("Zavolalo", "databadzu");
+            changeSaveButton.setText(getResources().getString(R.string.change));
 
             //TODO: skontrolovat ci to je ok podla novotneho predstav
 
@@ -157,7 +155,7 @@ public class GardenMaintenanceFormDetail extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
     }
-
+    //TODO: pozriet ci treba ukladanie saved instance state
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);

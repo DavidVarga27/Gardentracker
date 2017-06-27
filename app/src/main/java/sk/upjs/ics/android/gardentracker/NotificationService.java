@@ -19,7 +19,7 @@ import sk.upjs.ics.android.gardentracker.provider.Contract;
 
 
 public class NotificationService extends IntentService {
-    public static final String WORKER_THREAD_NAME = "PresenceService";
+    public static final String WORKER_THREAD_NAME = "NotificationService";
 
     public NotificationService() {
         super(WORKER_THREAD_NAME);
@@ -28,7 +28,7 @@ public class NotificationService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(getClass().getName(), "Presence service created");
+        Log.i(getClass().getName(), "Zaplo notification service");
     }
 
     @Override
@@ -47,46 +47,46 @@ public class NotificationService extends IntentService {
         calendar.set(year,month,day,0,0,0);
         long notificationTimeToday = calendar.getTimeInMillis()+notificationTime*1000*60;//ze kedy dneska ma byt notifikacia
 
-        if (  notificationTimeToday<=System.currentTimeMillis() && System.currentTimeMillis()<=notificationTimeToday+60*1000) {
-          /*  int num_of_task = 0;
+        if (  notificationTimeToday<=System.currentTimeMillis() && System.currentTimeMillis()<=notificationTimeToday+5*60*1000) {
+            int numOfTask = 0;
             Date date = new Date(System.currentTimeMillis());
             date.setHours(0);
             date.setMinutes(0);
             date.setSeconds(0);
-            long start_time = date.getTime();
-            long end_time = start_time + 24*3600*1000;
+            long startTime = date.getTime();
+            long endTime = startTime + 24*3600*1000;
 
             cursor = getContentResolver().query(Contract.Maintenance.CONTENT_URI,null,null,null,null);
 
             while (cursor.moveToNext()) {
-                long next_check = cursor.getLong(cursor.getColumnIndex(Contract.Maintenance.NEXT_CHECK));
-                if (next_check >= start_time && next_check < end_time)
-                    num_of_task ++;
-            }*/
-            triggerNotification(1);
+                long nextCheck = cursor.getLong(cursor.getColumnIndex(Contract.Maintenance.NEXT_CHECK));
+                if (nextCheck >= startTime && nextCheck < endTime)
+                    numOfTask ++;
+            }
+            triggerNotification(numOfTask);
         }
     }
 
     @Override
     public void onDestroy() {
-        Log.i(getClass().getName(), "Notification service destroyed");
+        Log.i(getClass().getName(), "Vyplo notification service");
         super.onDestroy();
     }
 
     private void triggerNotification(int taskCount) {
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Notification notification = new Notification.Builder(this)
-                .setContentTitle("Garden maintenance")
-                .setContentText(String.format("Dnes musis spravit %d ulohy.",taskCount))
+                .setContentTitle(getResources().getString(R.string.work_for_today))
+                .setContentText(getResources().getQuantityString(R.plurals.notification_text_tasks,taskCount))
                 .setContentIntent(getNotificationContentIntent())
-                .setTicker("to co sa zobrazi hned na zaciatku")
+                .setTicker(getResources().getString(R.string.app_name))
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.spade)
                 .setSound(alarmSound)
                 .getNotification();
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify("Presentr", 0, notification);
+        notificationManager.notify(getResources().getString(R.string.app_name), 0, notification);
     }
 
     public PendingIntent getNotificationContentIntent() {

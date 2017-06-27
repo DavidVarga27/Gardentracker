@@ -58,13 +58,12 @@ public class Weather extends AppCompatActivity {
         cursor.moveToFirst();
         String city = cursor.getString(cursor.getColumnIndex(Contract.Weather.CITY));
 
-        RetrieveForecastTask rft = new RetrieveForecastTask();
+        WeatherTask rft = new WeatherTask();
         rft.execute(city);
     }
 
-    public class RetrieveForecastTask extends AsyncTask<String, Void, JSONObject> {
+    public class WeatherTask extends AsyncTask<String, Void, JSONObject> {
         private static final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?units=metric&q=%s&APPID=89d15296f24595504c7abd4eae948aa7";
-        private static final String TAG = "RetrieveForecastTask";
         private ProgressDialog progress;
 
         @Override
@@ -72,7 +71,7 @@ public class Weather extends AppCompatActivity {
             super.onPreExecute();
 
             this.progress = new ProgressDialog(Weather.this);
-            this.progress.setMessage("Searching...");
+            this.progress.setMessage(getResources().getString(R.string.searching));
             this.progress.show();
         }
 
@@ -83,31 +82,21 @@ public class Weather extends AppCompatActivity {
                     URL url = new URL(String.format(WEATHER_URL, city));
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.connect();
-
                     if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                         return null;
                     }
-
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    connection.disconnect();
                     StringBuilder stringBuilder = new StringBuilder();
-
                     String line;
                     while ((line = bufferedReader.readLine()) != null) {
                         stringBuilder.append(line + '\n');
                     }
-
-                    Log.i(TAG, String.format("GET: %s", stringBuilder.toString()));
-
                     return new JSONObject(stringBuilder.toString());
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-
             return null;
         }
 

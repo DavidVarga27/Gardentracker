@@ -11,7 +11,6 @@ import android.util.Log;
 import static sk.upjs.ics.android.util.Defaults.*;
 
 public class GardenTrackerContentProvider extends ContentProvider {
-    //TODO: zmenit stringy
     //TODO: prerobit porovnavanie uri na switch
     private DatabaseOpenHelper databaseOpenHelper;
     

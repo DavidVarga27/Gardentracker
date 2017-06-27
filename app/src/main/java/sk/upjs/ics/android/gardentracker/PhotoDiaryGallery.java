@@ -45,22 +45,17 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
 
         String[] from = {Contract.PhotoDiary.PHOTO};
         int[] to = {R.id.onePhotoImageView};
-
         gridView = (GridView) findViewById(R.id.photoGridView);
         gridViewAdapter = new SimpleCursorAdapter(this, R.layout.one_photo_layout, Defaults.NO_CURSOR, from, to, Defaults.NO_FLAGS);
 
         gridViewAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                Log.d("index",String.valueOf(columnIndex));
                 if(columnIndex == cursor.getColumnIndex(Contract.PhotoDiary.PHOTO)){
                     ImageView imageView = (ImageView)view;
 
                     BitmapFactory.Options options = new BitmapFactory.Options();
-                   // options.inDither = false;
-                   // options.inTempStorage = new byte[1024 *32];
                     byte[] pic = cursor.getBlob(cursor.getColumnIndex(Contract.PhotoDiary.PHOTO));
-
                     Bitmap bm = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
                     imageView.setImageBitmap(bm);
 
@@ -87,11 +82,8 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
                                     .setTitle(getResources().getString(R.string.warning)).setPositiveButton(getResources().getString(R.string.delete), new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-                                            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
-                                                // no specific behavior is required after DELETE is completed
-                                            };
+                                            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {};
                                             queryHandler.startDelete(0, null, Uri.withAppendedPath(Contract.PhotoDiary.CONTENT_URI, String.valueOf(id)), Defaults.NO_SELECTION, Defaults.NO_SELECTION_ARGS);
-
                                         }
                                     })
                                     .setNegativeButton(getResources().getString(R.string.close), null)
@@ -100,7 +92,6 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
                             return true;
                         }
                     });
-
                     return true;
                 }
                 return false;
@@ -170,7 +161,7 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
         AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()){
             @Override
             protected void onInsertComplete(int token, Object cookie, Uri uri) {
-                Toast.makeText(PhotoDiaryGallery.this, "Saved!", Toast.LENGTH_LONG).show();
+                Toast.makeText(PhotoDiaryGallery.this, getResources().getString(R.string.saved), Toast.LENGTH_LONG).show();
 
             }
         };
@@ -181,7 +172,7 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (id != Defaults.DEFAULT_LOADER_ID) {
-            throw new IllegalStateException("Invalid loader ID " + id);
+            throw new IllegalStateException(String.format(getResources().getString(R.string.invalid_loader),id));
         }
 
         CursorLoader cursorLoader = new CursorLoader(this);
@@ -192,11 +183,6 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         data.setNotificationUri(getContentResolver(), Contract.PhotoDiary.CONTENT_URI);
-        Log.d("pocet riadkov",String.valueOf(data.getCount()));
-        data.moveToFirst();
-        while (data.moveToNext()) {
-            Log.d("foto",data.getBlob(data.getColumnIndex(Contract.PhotoDiary.PHOTO)).toString());
-        }
         gridViewAdapter.swapCursor(data);
     }
 

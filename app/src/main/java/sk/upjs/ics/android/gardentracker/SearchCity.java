@@ -62,7 +62,6 @@ public class SearchCity extends AppCompatActivity {
                                     AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
                                         @Override
                                         protected void onInsertComplete(int token, Object cookie, Uri uri) {
-                                            //TODO: zapne sa druha aktivita weather a vymazat ten toast
                                             finish();
                                             Intent intent = new Intent(SearchCity.this, Weather.class);
                                             startActivity(intent);
@@ -99,7 +98,7 @@ public class SearchCity extends AppCompatActivity {
                         }
 
                     } catch (IOException e) {
-                        Toast.makeText(getApplicationContext(), "Connection error", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.connection_error), Toast.LENGTH_SHORT).show();
                         e.printStackTrace();
                     }
                 }

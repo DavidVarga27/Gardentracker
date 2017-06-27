@@ -12,7 +12,7 @@ import static sk.upjs.ics.android.util.Defaults.*;
 
 
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
-    //TODO: zmenit stringy
+
     public static final String DATABASE_NAME = "garden_tracker";
     public static final int DATABASE_VERSION = 1;
 
@@ -82,19 +82,17 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     private String createTableSettings() {
         String sqlTemplate = "CREATE TABLE %s ("
                 + "%s INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + "%s INTEGER, "
-                + "%s LONG "
+                + "%s INTEGER "
                 + ")";
         return String.format(sqlTemplate,
                 Contract.Settings.TABLE_NAME,
                 Contract.Settings._ID,
-                Contract.Settings.NOTIFICATION_TIME,
-                Contract.Settings.LAST_NOTIFICATION_TIME);
+                Contract.Settings.NOTIFICATION_TIME);
     }
 
     private void insertSettings(SQLiteDatabase db) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Settings.NOTIFICATION_TIME, 485 );
+        contentValues.put(Contract.Settings.NOTIFICATION_TIME, 573 );
         db.insert(Contract.Settings.TABLE_NAME, NO_NULL_COLUMN_HACK, contentValues);
     }
 

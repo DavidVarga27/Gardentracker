@@ -17,6 +17,6 @@ public class NotificationScheduler {
 
         Intent intent = new Intent(context, NotificationService.class);
         PendingIntent pendingIntent = PendingIntent.getService(context, SERVICE_REQUEST_CODE, intent, NO_FLAGS);
-        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 10 * 1000, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 5 * 60 * 1000, pendingIntent);
     }
 }

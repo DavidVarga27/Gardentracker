@@ -37,124 +37,106 @@ public class GardenMaintenance extends AppCompatActivity implements LoaderManage
         setContentView(R.layout.activity_garden_maintenance);
 
         listView = (ListView) findViewById(R.id.listView);
+        String[] from = {Contract.Maintenance.NAME, Contract.Maintenance.NEXT_CHECK};
+        int[] to = {R.id.maintenanceTitleTextView, R.id.maintenanceDaysLeftTextView};
+        listViewAdapter = new SimpleCursorAdapter(this, R.layout.one_maintenance_layout, Defaults.NO_CURSOR, from, to, Defaults.NO_FLAGS);
+        listViewAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 
+                TextView textView = (TextView) view;
+                final View parent = (View) view.getParent();//jedno policko maintenance
+                final int position = cursor.getPosition();
 
-            Log.d("nacitava sa", "z databazy");
-            String[] from = {Contract.Maintenance.NAME, Contract.Maintenance.NEXT_CHECK};
-            int[] to = {R.id.maintenanceTitleTextView, R.id.maintenanceDaysLeftTextView};
-            listViewAdapter = new SimpleCursorAdapter(this, R.layout.one_maintenance_layout, Defaults.NO_CURSOR, from, to, Defaults.NO_FLAGS);
-            listViewAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-                @Override
-                public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-
-                    TextView textView = (TextView) view;
-                    final View parent = (View) view.getParent();//jedno policko maintenance
-                    final int position = cursor.getPosition();
-
-                    if (columnIndex == cursor.getColumnIndex(Contract.Maintenance.NAME)) {
-                        //Log.d("nacitalo sa", "z databazy");
-                        String name = cursor.getString(columnIndex);
-                        textView.setText(name);
-                        return true;
-                    } else if (columnIndex == cursor.getColumnIndex(Contract.Maintenance.NEXT_CHECK)) {
-                        //Log.d("nacitalo sa", "z databazy");
-                        long nextCheck = cursor.getLong(columnIndex);
-                        long actualDate = System.currentTimeMillis();
-                        long daysLeft = (long) Math.ceil((nextCheck - actualDate) / (24.0 * 3600 * 1000));
-                        if(daysLeft==0){
-                            parent.setBackgroundColor(getResources().getColor(R.color.warning));
-                        }
-                        Log.d("days",String.valueOf(daysLeft));
-                        String days = String.format(getResources().getString(R.string.days_left), daysLeft);
-                        textView.setText(days);
-
-                        parent.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(GardenMaintenance.this, GardenMaintenanceFormDetail.class);
-                                intent.putExtra(getResources().getString(R.string.position), position);
-                                startActivity(intent);
-                            }
-                        });
-
-                        parent.setOnLongClickListener(new View.OnLongClickListener() {
-                            @Override
-                            public boolean onLongClick(View v) {
-                                int position = listView.getPositionForView(parent);
-                                Cursor cursor = getContentResolver().query(Contract.Maintenance.CONTENT_URI, null, null, null, null);
-                                cursor.moveToPosition(position);
-                                final int id = cursor.getInt(cursor.getColumnIndex(Contract.Maintenance._ID));
-
-                                final AlertDialog dialog = new AlertDialog.Builder(GardenMaintenance.this).setMessage(getResources().getString(R.string.delete_maintenance_question))
-                                        .setTitle(getResources().getString(R.string.warning)).setPositiveButton(getResources().getString(R.string.delete), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
-                                                    // no specific behavior is required after DELETE is completed
-                                                };
-                                                queryHandler.startDelete(0, null, Uri.withAppendedPath(Contract.Maintenance.CONTENT_URI, String.valueOf(id)), Defaults.NO_SELECTION, Defaults.NO_SELECTION_ARGS);
-
-                                            }
-                                        })
-                                        .setNegativeButton(getResources().getString(R.string.close), null)
-                                        .show();
-                                doKeepDialog(dialog);
-
-                                //  Uri selectedMaintenanceUri = ContentUris.withAppendedId(Contract.Maintenance.CONTENT_URI, id);
-
-                                return true;
-                            }
-                        });
-
-                        Button doneButton = (Button) parent.findViewById(R.id.doneButton);
-                        doneButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                final AlertDialog dialog = new AlertDialog.Builder(GardenMaintenance.this).setMessage(getResources().getString(R.string.done_maintenance_question))
-                                        .setTitle(getResources().getString(R.string.warning)).setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                int position = listView.getPositionForView(parent);
-                                                Cursor cursor = getContentResolver().query(Contract.Maintenance.CONTENT_URI, null, null, null, null);
-                                                cursor.moveToPosition(position);
-                                                final int id = cursor.getInt(cursor.getColumnIndex(Contract.Maintenance._ID));
-
-
-
-                                                long intervalInDays = cursor.getLong(cursor.getColumnIndex(Contract.Maintenance.INTERVAL_IN_DAYS));
-
-
-
-
-                                                long last_check = System.currentTimeMillis();
-                                                long next_check = last_check + intervalInDays*24*3600*1000;
-                                                ContentValues contentValues = new ContentValues();
-                                                contentValues.put(Contract.Maintenance.LAST_CHECK, last_check);
-                                                contentValues.put(Contract.Maintenance.NEXT_CHECK, next_check);
-
-                                                AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
-                                                    @Override
-                                                    protected void onUpdateComplete(int token, Object cookie, int result) {
-                                                        Toast.makeText(GardenMaintenance.this, "Updated!", Toast.LENGTH_LONG).show();
-
-                                                    }
-                                                };
-                                                Uri selectedMaintenanceUri = ContentUris.withAppendedId(Contract.Maintenance.CONTENT_URI, id);
-                                                queryHandler.startUpdate(0,Defaults.NO_COOKIE,selectedMaintenanceUri,contentValues,null,null);
-                                            }
-                                        })
-                                        .setNegativeButton(getResources().getString(R.string.no), null)
-                                        .show();
-                                doKeepDialog(dialog);
-                            }
-                        });
-                        return true;
+                if (columnIndex == cursor.getColumnIndex(Contract.Maintenance.NAME)) {
+                    String name = cursor.getString(columnIndex);
+                    textView.setText(name);
+                    return true;
+                } else if (columnIndex == cursor.getColumnIndex(Contract.Maintenance.NEXT_CHECK)) {
+                    long nextCheck = cursor.getLong(columnIndex);
+                    long actualDate = System.currentTimeMillis();
+                    long daysLeft = (long) Math.ceil((nextCheck - actualDate) / (24.0 * 3600 * 1000));
+                    if(daysLeft==0){
+                        parent.setBackgroundColor(getResources().getColor(R.color.warning));
                     }
-                    return false;
+                    String days = String.format(getResources().getString(R.string.days_left), daysLeft);
+                    textView.setText(days);
+
+                    parent.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(GardenMaintenance.this, GardenMaintenanceFormDetail.class);
+                            intent.putExtra(getResources().getString(R.string.position), position);
+                            startActivity(intent);
+                        }
+                    });
+
+                    parent.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            int position = listView.getPositionForView(parent);
+                            Cursor cursor = getContentResolver().query(Contract.Maintenance.CONTENT_URI, null, null, null, null);
+                            cursor.moveToPosition(position);
+                            final int id = cursor.getInt(cursor.getColumnIndex(Contract.Maintenance._ID));
+
+                            final AlertDialog dialog = new AlertDialog.Builder(GardenMaintenance.this).setMessage(getResources().getString(R.string.delete_maintenance_question))
+                                    .setTitle(getResources().getString(R.string.warning)).setPositiveButton(getResources().getString(R.string.delete), new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+                                            };
+                                            queryHandler.startDelete(0, null, Uri.withAppendedPath(Contract.Maintenance.CONTENT_URI, String.valueOf(id)), Defaults.NO_SELECTION, Defaults.NO_SELECTION_ARGS);
+
+                                        }
+                                    })
+                                    .setNegativeButton(getResources().getString(R.string.close), null)
+                                    .show();
+                            doKeepDialog(dialog);
+                            return true;
+                        }
+                    });
+
+                    Button doneButton = (Button) parent.findViewById(R.id.doneButton);
+                    doneButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            final AlertDialog dialog = new AlertDialog.Builder(GardenMaintenance.this).setMessage(getResources().getString(R.string.done_maintenance_question))
+                                    .setTitle(getResources().getString(R.string.warning)).setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            int position = listView.getPositionForView(parent);
+                                            Cursor cursor = getContentResolver().query(Contract.Maintenance.CONTENT_URI, null, null, null, null);
+                                            cursor.moveToPosition(position);
+                                            final int id = cursor.getInt(cursor.getColumnIndex(Contract.Maintenance._ID));
+                                            long intervalInDays = cursor.getLong(cursor.getColumnIndex(Contract.Maintenance.INTERVAL_IN_DAYS));
+                                            long last_check = System.currentTimeMillis();
+                                            long next_check = last_check + intervalInDays*24*3600*1000;
+                                            ContentValues contentValues = new ContentValues();
+                                            contentValues.put(Contract.Maintenance.LAST_CHECK, last_check);
+                                            contentValues.put(Contract.Maintenance.NEXT_CHECK, next_check);
+
+                                            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+                                                @Override
+                                                protected void onUpdateComplete(int token, Object cookie, int result) {
+                                                    Toast.makeText(GardenMaintenance.this, getResources().getString(R.string.updated), Toast.LENGTH_LONG).show();
+                                                }
+                                            };
+                                            Uri selectedMaintenanceUri = ContentUris.withAppendedId(Contract.Maintenance.CONTENT_URI, id);
+                                            queryHandler.startUpdate(0,Defaults.NO_COOKIE,selectedMaintenanceUri,contentValues,null,null);
+                                        }
+                                    })
+                                    .setNegativeButton(getResources().getString(R.string.no), null)
+                                    .show();
+                            doKeepDialog(dialog);
+                        }
+                    });
+                    return true;
                 }
-            });
-            listView.setAdapter(listViewAdapter);
-            getLoaderManager().initLoader(Defaults.DEFAULT_LOADER_ID, Bundle.EMPTY, this);
+                return false;
+            }
+        });
+        listView.setAdapter(listViewAdapter);
+        getLoaderManager().initLoader(Defaults.DEFAULT_LOADER_ID, Bundle.EMPTY, this);
 
     }
 
@@ -172,7 +154,7 @@ public class GardenMaintenance extends AppCompatActivity implements LoaderManage
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (id != Defaults.DEFAULT_LOADER_ID) {
-            throw new IllegalStateException("Invalid loader ID " + id);
+            throw new IllegalStateException(String.format(getResources().getString(R.string.invalid_loader),id));
         }
 
         CursorLoader cursorLoader = new CursorLoader(this);
@@ -197,32 +179,4 @@ public class GardenMaintenance extends AppCompatActivity implements LoaderManage
         startActivity(intent);
     }
 
-
-    /*  ContentValues contentValues = new ContentValues();
-        contentValues.put(Contract.Maintenance.NAME, "Test this");
-        contentValues.put(Contract.Maintenance.DESCRIPTION, "Test description");
-        contentValues.put(Contract.Maintenance.LAST_CHECK, System.currentTimeMillis());
-        contentValues.put(Contract.Maintenance.NEXT_CHECK, System.currentTimeMillis()+5*24*3600*1000);
-        contentValues.put(Contract.Maintenance.INTERVAL_IN_DAYS, 5*24*3600*1000);
-
-        AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
-            @Override
-            protected void onInsertComplete(int token, Object cookie, Uri uri) {
-                Toast.makeText(GardenMaintenance.this, "Note was saved", Toast.LENGTH_LONG).show();
-            }
-        };
-        queryHandler.startInsert(0, Defaults.NO_COOKIE, Contract.Maintenance.CONTENT_URI, contentValues);
-    }
-
-
-
-   @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
-            // no specific behavior is required after DELETE is completed
-        };
-        queryHandler.startDelete(0, null, Uri.withAppendedPath(Contract.Maintenance.CONTENT_URI, String.valueOf(id)), Defaults.NO_SELECTION, Defaults.NO_SELECTION_ARGS);
-
-        return true;
-    }*/
 }
