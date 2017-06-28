@@ -29,7 +29,7 @@ public class GardenMaintenanceFormDetail extends AppCompatActivity {
     private Button changeSaveButton;
     private int position;
     private int id;
-    private boolean editable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -42,13 +42,16 @@ public class GardenMaintenanceFormDetail extends AppCompatActivity {
     }
 
     private void fillOutForm(Bundle savedInstanceState){
-        changeSaveButton = (Button) findViewById(R.id.saveButton);
         ((Button) findViewById(R.id.backButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
+
+
+        //inicializacia changeSaveButtona aj s updateom aj s udalostami okolo kliknutia
+        changeSaveButton = (Button) findViewById(R.id.saveButton);
         changeSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,7 +77,7 @@ public class GardenMaintenanceFormDetail extends AppCompatActivity {
                         contentValues.put(Contract.Maintenance.NEXT_CHECK, startDate+intervalInMilliseconds);
                         contentValues.put(Contract.Maintenance.INTERVAL_IN_DAYS, Integer.parseInt(interval));
 
-
+                        //updatovanie
                         AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
 
                             @Override
@@ -106,35 +109,38 @@ public class GardenMaintenanceFormDetail extends AppCompatActivity {
         datePicker = (DatePicker) findViewById(R.id.startdatePicker);
 
         if (savedInstanceState == null) {
-            String name, description;
-            long interval,date;
             Intent intent = getIntent();
             position = intent.getIntExtra("position", 0);
 
-            Cursor cursor = getContentResolver().query(Contract.Maintenance.CONTENT_URI, null, null, null, null);
-            cursor.moveToPosition(position);
-            id = cursor.getInt(cursor.getColumnIndex(Contract.Maintenance._ID));
+            //z databazy nacita udaje do formu
+            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+                @Override
+                protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                    super.onQueryComplete(token, cookie, cursor);
 
-            name = cursor.getString(cursor.getColumnIndex(Contract.Maintenance.NAME));
-            description = cursor.getString(cursor.getColumnIndex(Contract.Maintenance.DESCRIPTION));
-            interval = cursor.getInt(cursor.getColumnIndex(Contract.Maintenance.INTERVAL_IN_DAYS));
-            date = cursor.getLong(cursor.getColumnIndex(Contract.Maintenance.LAST_CHECK));
+                    cursor.moveToPosition(position);
+                    id = cursor.getInt(cursor.getColumnIndex(Contract.Maintenance._ID));
+
+                    String name = cursor.getString(cursor.getColumnIndex(Contract.Maintenance.NAME));
+                    String description = cursor.getString(cursor.getColumnIndex(Contract.Maintenance.DESCRIPTION));
+                    long interval = cursor.getInt(cursor.getColumnIndex(Contract.Maintenance.INTERVAL_IN_DAYS));
+                    long date = cursor.getLong(cursor.getColumnIndex(Contract.Maintenance.LAST_CHECK));
+
+                    nameEditText.setText(name);
+                    descriptionEditText.setText(description);
+                    intervalEditText.setText(String.valueOf(interval));
+
+                    Calendar calendar = new GregorianCalendar();
+                    calendar.setTimeInMillis(date);
+
+                    datePicker.updateDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+
+                }
+            };
+            queryHandler.startQuery(0, Defaults.NO_COOKIE,Contract.Maintenance.CONTENT_URI,null,null,null,null);
+
             changeSaveButton = (Button) findViewById(R.id.saveButton);
             changeSaveButton.setText(getResources().getString(R.string.change));
-
-            //TODO: skontrolovat ci to je ok podla novotneho predstav
-
-
-
-            nameEditText.setText(name);
-            descriptionEditText.setText(description);
-            intervalEditText.setText(String.valueOf(interval));
-
-            Calendar calendar = new GregorianCalendar();
-            calendar.setTimeInMillis(date);
-
-            datePicker.updateDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
-
             nameEditText.setEnabled(false);
             descriptionEditText.setEnabled(false);
             intervalEditText.setEnabled(false);
@@ -142,8 +148,9 @@ public class GardenMaintenanceFormDetail extends AppCompatActivity {
         }
     }
 
+    //ze ci je formular v editovatelnom stave, pouziva sa to v savedInstanceState
     private boolean isEditable(){
-        return changeSaveButton.getText().toString()== getResources().getString(R.string.save);
+        return getResources().getString(R.string.save).equals(changeSaveButton.getText().toString());
     }
 
     @Override
@@ -155,7 +162,7 @@ public class GardenMaintenanceFormDetail extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
     }
-    //TODO: pozriet ci treba ukladanie saved instance state
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);

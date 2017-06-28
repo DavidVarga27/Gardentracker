@@ -1,6 +1,7 @@
 package sk.upjs.ics.android.gardentracker;
 
 import android.app.ProgressDialog;
+import android.content.AsyncQueryHandler;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -35,6 +36,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import sk.upjs.ics.android.gardentracker.provider.Contract;
+import sk.upjs.ics.android.util.Defaults;
 
 public class Weather extends AppCompatActivity {
 
@@ -56,14 +58,22 @@ public class Weather extends AppCompatActivity {
             }
         });
 
-        Cursor cursor = getContentResolver().query(Contract.Weather.CONTENT_URI,null,null,null,null);
-        cursor.moveToFirst();
-        String city = cursor.getString(cursor.getColumnIndex(Contract.Weather.CITY));
+        AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+            @Override
+            protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                super.onQueryComplete(token, cookie, cursor);
 
-        WeatherTask rft = new WeatherTask();
-        rft.execute(city);
+                cursor.moveToFirst();
+                String city = cursor.getString(cursor.getColumnIndex(Contract.Weather.CITY));
+
+                WeatherTask rft = new WeatherTask();
+                rft.execute(city);
+            }
+        };
+        queryHandler.startQuery(0, Defaults.NO_COOKIE,Contract.Weather.CONTENT_URI,null,null,null,null);
     }
 
+    //na vstupe je String, co je v podstate meno mesta....stranka kde sa robilo pocasie http://it4kt.cnl.sk/c/smart/2015/lecture.04.html
     public class WeatherTask extends AsyncTask<String, Void, JSONObject> {
         private static final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?units=metric&q=%s&APPID=89d15296f24595504c7abd4eae948aa7";
         private ProgressDialog progress;
@@ -110,10 +120,11 @@ public class Weather extends AppCompatActivity {
             this.progress.dismiss();
 
             if (json == null) {
-                Toast.makeText(getApplicationContext(), "Connection error2", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Connection error, weather data is null", Toast.LENGTH_SHORT).show();
                 return;
             }else{
 
+                //rozpytvavanie JSON-a zo stranky
                 try {
                     JSONArray weather = json.getJSONArray("weather");
                     JSONObject weatherObject = weather.getJSONObject(0);
@@ -128,7 +139,12 @@ public class Weather extends AppCompatActivity {
 
                     weatherObject = json.getJSONObject("wind");
                     int windSpeed = weatherObject.getInt("speed");
-                    int windDirection = weatherObject.getInt("deg");
+                    int windDirection;
+                    try {
+                        windDirection = weatherObject.getInt("deg");
+                    } catch (Exception e) {
+                        windDirection = -1;
+                    }
 
                     weatherObject = json.getJSONObject("sys");
                     long sunset = weatherObject.getLong("sunset");
@@ -163,15 +179,20 @@ public class Weather extends AppCompatActivity {
 
     }
 
+    //prepocitanie stupnov smeru vetra na Nazvy smeru
     private String degreesToDirection(int deg){
-       double val = Math.floor((deg / 22.5) + 0.5);
+        if (deg == -1) {
+            return "N/A";
+        } else {
+            double val = Math.floor((deg / 22.5) + 0.5);
 
-        String[] directions = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
-        int indexOfDirection = (int)(val % 16);
-        return directions[indexOfDirection];
-
+            String[] directions = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
+            int indexOfDirection = (int) (val % 16);
+            return directions[indexOfDirection];
+        }
     }
 
+    //cas v sekundach prerobeny na String
     private String longToTime(long time){
 
         Calendar calendar = Calendar.getInstance();

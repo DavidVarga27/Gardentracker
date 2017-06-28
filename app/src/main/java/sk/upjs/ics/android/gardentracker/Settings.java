@@ -39,7 +39,6 @@ fillOutTimePicker();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        setTime();
         final Button changeSaveButton = (Button) findViewById(R.id.changeSaveButton);
         changeSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,46 +48,64 @@ fillOutTimePicker();
                     changeSaveButton.setText(getResources().getString(R.string.save));
                 }else{
                     notificationTimePicker.setEnabled(false);
-                    int minutesOfNotification=notificationTimePicker.getCurrentHour()*60+notificationTimePicker.getCurrentMinute();
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(Contract.Settings.NOTIFICATION_TIME,minutesOfNotification);
+                    changeSaveButton.setText(getResources().getString(R.string.change));
 
-                    Cursor cursor = getContentResolver().query(Contract.Settings.CONTENT_URI, null, null, null, null);
-                    cursor.moveToFirst();
-                    int id = cursor.getInt(cursor.getColumnIndex(Contract.Settings._ID));
-
+                    //kliklo sa na SAVE,,insert tam nie je tam default nastaveny insert v dbOpenHelper
                     AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
-
                         @Override
-                        protected void onUpdateComplete(int token, Object cookie, int result) {
-                            Toast.makeText(getApplicationContext(),getResources().getString(R.string.updated),Toast.LENGTH_SHORT).show();
+                        protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                            super.onQueryComplete(token, cookie, cursor);
+
+                            int minutesOfNotification=notificationTimePicker.getCurrentHour()*60+notificationTimePicker.getCurrentMinute();
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(Contract.Settings.NOTIFICATION_TIME,minutesOfNotification);
+
+                            cursor.moveToFirst();
+                            int id = cursor.getInt(cursor.getColumnIndex(Contract.Settings._ID));
+
+                            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+
+                                @Override
+                                protected void onUpdateComplete(int token, Object cookie, int result) {
+                                    Toast.makeText(getApplicationContext(),getResources().getString(R.string.updated),Toast.LENGTH_SHORT).show();
+                                }
+                            };
+                            Uri selectedUri = ContentUris.withAppendedId(Contract.Settings.CONTENT_URI, id);
+                            queryHandler.startUpdate(0, Defaults.NO_COOKIE,selectedUri,contentValues,null,null);
                         }
                     };
-                    Uri selectedUri = ContentUris.withAppendedId(Contract.Settings.CONTENT_URI, id);
-                    queryHandler.startUpdate(0, Defaults.NO_COOKIE,selectedUri,contentValues,null,null);
-
-                    changeSaveButton.setText(getResources().getString(R.string.change));
+                    queryHandler.startQuery(0, Defaults.NO_COOKIE,Contract.Settings.CONTENT_URI,null,null,null,null);
                 }
             }
         });
 
 
+        setTime();
     }
 
 
 
     private void setTime() {
         notificationTimePicker = (TimePicker)findViewById(R.id.notificationTimePicker);
+        notificationTimePicker.setEnabled(false);
+
         notificationTimePicker.setIs24HourView(true);
 
-        Cursor cursor = getContentResolver().query(Contract.Settings.CONTENT_URI, null, null, null, null);
-        cursor.moveToFirst();
-        int settingsMinutes = cursor.getInt(cursor.getColumnIndex(Contract.Settings.NOTIFICATION_TIME));
-        int hour = settingsMinutes / 60;
-        int minutes = settingsMinutes % 60;
-        notificationTimePicker.setCurrentHour(hour);
-        notificationTimePicker.setCurrentMinute(minutes);
-        notificationTimePicker.setEnabled(false);
+
+        AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+            @Override
+            protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                super.onQueryComplete(token, cookie, cursor);
+
+                cursor.moveToFirst();
+                int settingsMinutes = cursor.getInt(cursor.getColumnIndex(Contract.Settings.NOTIFICATION_TIME));
+                int hour = settingsMinutes / 60;
+                int minutes = settingsMinutes % 60;
+                notificationTimePicker.setCurrentHour(hour);
+                notificationTimePicker.setCurrentMinute(minutes);
+            }
+        };
+        queryHandler.startQuery(0, Defaults.NO_COOKIE,Contract.Settings.CONTENT_URI,null,null,null,null);
     }
 
 

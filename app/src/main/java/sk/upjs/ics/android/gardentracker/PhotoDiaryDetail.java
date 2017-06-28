@@ -39,12 +39,8 @@ public class PhotoDiaryDetail extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_diary_detail);
 
-
         fillOutForm(savedInstanceState);
     }
-
-
-
 
 
     private void fillOutForm(Bundle savedInstanceState){
@@ -56,23 +52,30 @@ public class PhotoDiaryDetail extends AppCompatActivity {
         imageView = (ImageView)findViewById(R.id.photoImageView);
 
         if (savedInstanceState == null) {
-            String name, description;
-            Cursor cursor = getContentResolver().query(Contract.PhotoDiary.CONTENT_URI, null, null, null, null);
-            cursor.moveToPosition(position);
-            id = cursor.getInt(cursor.getColumnIndex(Contract.PhotoDiary._ID));
 
-            name = cursor.getString(cursor.getColumnIndex(Contract.PhotoDiary.NAME));
-            description = cursor.getString(cursor.getColumnIndex(Contract.PhotoDiary.DESCRIPTION));
-            long timeInMillis = cursor.getLong(cursor.getColumnIndex(Contract.PhotoDiary.DATE));
+            //query do db pre pred tym kliknuty obrazok
+            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+                @Override
+                protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                    super.onQueryComplete(token, cookie, cursor);
 
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            byte[] pic = cursor.getBlob(cursor.getColumnIndex(Contract.PhotoDiary.PHOTO));
-            Bitmap bm = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
-            imageView.setImageBitmap(bm);
+                    cursor.moveToPosition(position);
+                    id = cursor.getInt(cursor.getColumnIndex(Contract.PhotoDiary._ID));
+                    String name = cursor.getString(cursor.getColumnIndex(Contract.PhotoDiary.NAME));
+                    String description = cursor.getString(cursor.getColumnIndex(Contract.PhotoDiary.DESCRIPTION));
+                    long timeInMillis = cursor.getLong(cursor.getColumnIndex(Contract.PhotoDiary.DATE));
 
-            nameEditText.setText(name);
-            timeTextView.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date(timeInMillis)));
-            descriptionEditText.setText(description);
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    byte[] pic = cursor.getBlob(cursor.getColumnIndex(Contract.PhotoDiary.PHOTO));
+                    Bitmap bm = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
+                    imageView.setImageBitmap(bm);
+                    nameEditText.setText(name);
+                    timeTextView.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date(timeInMillis)));
+                    descriptionEditText.setText(description);
+                }
+            };
+            queryHandler.startQuery(0, Defaults.NO_COOKIE,Contract.PhotoDiary.CONTENT_URI,null,null,null,null);
+
             nameEditText.setEnabled(false);
             descriptionEditText.setEnabled(false);
         }
@@ -94,6 +97,7 @@ public class PhotoDiaryDetail extends AppCompatActivity {
                     if(name.length() == 0){
                         Toast.makeText(getApplicationContext(),getResources().getString(R.string.fill_form_warning_toast),Toast.LENGTH_LONG).show();
                     }else {
+                        //updatenutie v databaze
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Contract.PhotoDiary.NAME,name);
                         contentValues.put(Contract.PhotoDiary.DESCRIPTION, description);

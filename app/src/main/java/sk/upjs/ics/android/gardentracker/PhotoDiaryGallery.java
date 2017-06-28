@@ -60,11 +60,14 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
                 if(columnIndex == cursor.getColumnIndex(Contract.PhotoDiary.PHOTO)){
                     ImageView imageView = (ImageView)view;
 
+                    //prekonvertovanie z Blobu na BitMap a nastavenie obrazka
+
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     byte[] pic = cursor.getBlob(cursor.getColumnIndex(Contract.PhotoDiary.PHOTO));
                     Bitmap bm = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
                     imageView.setImageBitmap(bm);
 
+                    //po kliknuti na obrazok sa otvori detail
                     final View parent = (View) view.getParent();
                     final int position = cursor.getPosition();
                     parent.setOnClickListener(new View.OnClickListener() {
@@ -76,25 +79,33 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
                         }
                     });
 
+                    //vymazanie obrazka po dlhom kliknuti queryhandler v query handler,,,je to ok ?????????
                     parent.setOnLongClickListener(new View.OnLongClickListener() {
                         @Override
                         public boolean onLongClick(View v) {
-                            int position = gridView.getPositionForView(parent);
-                            Cursor cursor = getContentResolver().query(Contract.PhotoDiary.CONTENT_URI, null, null, null, null);
-                            cursor.moveToPosition(position);
-                            final int id = cursor.getInt(cursor.getColumnIndex(Contract.PhotoDiary._ID));
+                            final int position = gridView.getPositionForView(parent);
+                            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+                                @Override
+                                protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                                    super.onQueryComplete(token, cookie, cursor);
 
-                            final AlertDialog dialog = new AlertDialog.Builder(PhotoDiaryGallery.this).setMessage(getResources().getString(R.string.delete_photo_question))
-                                    .setTitle(getResources().getString(R.string.warning)).setPositiveButton(getResources().getString(R.string.delete), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {};
-                                            queryHandler.startDelete(0, null, Uri.withAppendedPath(Contract.PhotoDiary.CONTENT_URI, String.valueOf(id)), Defaults.NO_SELECTION, Defaults.NO_SELECTION_ARGS);
-                                        }
-                                    })
-                                    .setNegativeButton(getResources().getString(R.string.close), null)
-                                    .show();
-                            doKeepDialog(dialog);
+                                    cursor.moveToPosition(position);
+                                    final int id = cursor.getInt(cursor.getColumnIndex(Contract.PhotoDiary._ID));
+
+                                    final AlertDialog dialog = new AlertDialog.Builder(PhotoDiaryGallery.this).setMessage(getResources().getString(R.string.delete_photo_question))
+                                            .setTitle(getResources().getString(R.string.warning)).setPositiveButton(getResources().getString(R.string.delete), new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {};
+                                                    queryHandler.startDelete(0, null, Uri.withAppendedPath(Contract.PhotoDiary.CONTENT_URI, String.valueOf(id)), Defaults.NO_SELECTION, Defaults.NO_SELECTION_ARGS);
+                                                }
+                                            })
+                                            .setNegativeButton(getResources().getString(R.string.close), null)
+                                            .show();
+                                    doKeepDialog(dialog);
+                                }
+                            };
+                            queryHandler.startQuery(0, Defaults.NO_COOKIE,Contract.PhotoDiary.CONTENT_URI,null,null,null,null);
                             return true;
                         }
                     });
@@ -106,8 +117,25 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
         gridView.setAdapter(gridViewAdapter);
         getLoaderManager().initLoader(Defaults.DEFAULT_LOADER_ID, Bundle.EMPTY, this);
 
+        //spustenie fotoaparatu
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        if(checkCameraHardware(this)){
+            fab.setOnClickListener(new View.OnClickListener() {
 
-
+                @Override
+                public void onClick(View view) {
+                    try {
+                        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(intent, CAMERA_REQUEST);
+                    }
+                    catch (Exception e) {
+                        Toast.makeText(getApplicationContext(),getResources().getString(R.string.camera_toast),Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } else {
+            fab.setVisibility(View.INVISIBLE);
+        }
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -118,17 +146,16 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
         }
     }
 
-    /** Check if this device has a camera */
+    //kontrola ci ma zariadenie fotak
     private boolean checkCameraHardware(Context context) {
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-// this device has a camera
             return true;
         } else {
-// no camera on this device
             return false;
         }
     }
 
+    //prekonvertovanie z bitmap na bytes
     private  byte[] getBytesFromBitmap(Bitmap photo) {
         if (photo!=null) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -192,6 +219,7 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
     }
 
 
+    //nastavovanie menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -199,11 +227,9 @@ public class PhotoDiaryGallery extends AppCompatActivity implements LoaderManage
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement

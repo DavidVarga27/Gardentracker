@@ -72,7 +72,6 @@ public class GardenMaintenanceForm extends AppCompatActivity {
 
     }
 
-    //TODO: pozriet ci treba ukladanie saved instance state
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {

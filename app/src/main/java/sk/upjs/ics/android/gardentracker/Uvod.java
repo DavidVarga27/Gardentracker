@@ -3,6 +3,7 @@ package sk.upjs.ics.android.gardentracker;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -19,6 +20,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 
 import sk.upjs.ics.android.gardentracker.provider.Contract;
+import sk.upjs.ics.android.util.Defaults;
 
 public class Uvod extends AppCompatActivity {
     @Override
@@ -79,18 +81,24 @@ public class Uvod extends AppCompatActivity {
         ((Button)findViewById(R.id.weatherButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent;
+                AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+                    @Override
+                    protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                        super.onQueryComplete(token, cookie, cursor);
 
-                Cursor cursor = getContentResolver().query(Contract.Weather.CONTENT_URI, null, null, null, null);
-                if (cursor.getCount() == 0) {
-                    intent = new Intent(Uvod.this, SearchCity.class);
-                    intent.putExtra("db","insert");
-                    startActivity(intent);
-                }
-                else {
-                    intent = new Intent(Uvod.this, Weather.class);
-                    startActivity(intent);
-                }
+                        Intent intent;
+                        if (cursor.getCount() == 0) {
+                            intent = new Intent(Uvod.this, SearchCity.class);
+                            intent.putExtra("db","insert");
+                            startActivity(intent);
+                        }
+                        else {
+                            intent = new Intent(Uvod.this, Weather.class);
+                            startActivity(intent);
+                        }
+                    }
+                };
+                queryHandler.startQuery(0, Defaults.NO_COOKIE,Contract.Weather.CONTENT_URI,null,null,null,null);
             }
         });
 

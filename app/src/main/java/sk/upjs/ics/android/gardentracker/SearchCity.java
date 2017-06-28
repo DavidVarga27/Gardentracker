@@ -42,26 +42,29 @@ public class SearchCity extends AppCompatActivity {
         ((Button)findViewById(R.id.searchButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String city = ((EditText)findViewById(R.id.cityEditText)).getText().toString();
+                final String city = ((EditText)findViewById(R.id.cityEditText)).getText().toString();
                 if (city.length() == 0) {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.fill_city_warning_toast),Toast.LENGTH_SHORT).show();
                 }
                 else {
                     try {
+                        //docasne riesenie, ze sa povoli robit networkconnection v hlavnom vlakne
                         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                         StrictMode.setThreadPolicy(policy);
 
-
+//TODO: treba dat do async tasku
                         URL url = new URL("http://api.openweathermap.org/data/2.5/weather?units=metric&APPID=89d15296f24595504c7abd4eae948aa7&q=" + city);
                         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                         connection.connect();
 
                         if (connection.getResponseCode() == 200) {
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put(Contract.Weather.CITY, city);
+                            connection.disconnect();
 
                             switch (dbOperation) {
-                                case "insert": {
+                                case "insert": {//toto prichadza z Uvodu, ked v tabulke Weather nie su data
+                                    //vlozim mesto uplne prvy krat do tabulky
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put(Contract.Weather.CITY, city);
                                     AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
                                         @Override
                                         protected void onInsertComplete(int token, Object cookie, Uri uri) {
@@ -73,32 +76,42 @@ public class SearchCity extends AppCompatActivity {
                                     queryHandler.startInsert(0, Defaults.NO_COOKIE, Contract.Weather.CONTENT_URI, contentValues);
                                     break;
                                 }
-                                case "update": {
-                                    Cursor cursor = getContentResolver().query(Contract.Weather.CONTENT_URI, null, null, null, null);
-                                    cursor.moveToFirst();
-                                    int id = cursor.getInt(cursor.getColumnIndex(Contract.Weather._ID));
+                                case "update": {//toto prichadza z Weather
 
+                                    //prepise sa meno mesta
                                     AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
-
                                         @Override
-                                        protected void onUpdateComplete(int token, Object cookie, int result) {
-                                            finish();
-                                            Intent intent = new Intent(SearchCity.this, Weather.class);
-                                            startActivity(intent);
+                                        protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                                            super.onQueryComplete(token, cookie, cursor);
+
+                                            cursor.moveToFirst();
+                                            int id = cursor.getInt(cursor.getColumnIndex(Contract.Weather._ID));
+                                            ContentValues contentValues = new ContentValues();
+                                            contentValues.put(Contract.Weather.CITY, city);
+
+                                            AsyncQueryHandler queryHandler = new AsyncQueryHandler(getContentResolver()) {
+
+                                                @Override
+                                                protected void onUpdateComplete(int token, Object cookie, int result) {
+                                                    finish();
+                                                    Intent intent = new Intent(SearchCity.this, Weather.class);
+                                                    startActivity(intent);
+                                                }
+                                            };
+                                            Uri selectedUri = ContentUris.withAppendedId(Contract.Weather.CONTENT_URI, id);
+                                            queryHandler.startUpdate(0, Defaults.NO_COOKIE,selectedUri,contentValues,null,null);
                                         }
                                     };
-                                    Uri selectedUri = ContentUris.withAppendedId(Contract.Weather.CONTENT_URI, id);
-                                    queryHandler.startUpdate(0, Defaults.NO_COOKIE,selectedUri,contentValues,null,null);
-
-
+                                    queryHandler.startQuery(0, Defaults.NO_COOKIE,Contract.Weather.CONTENT_URI,null,null,null,null);
                                     break;
                                 }
                             }
-
                         }
+
                         else {
                             Toast.makeText(getApplicationContext(), getResources().getString(R.string.city_not_found), Toast.LENGTH_SHORT).show();
                         }
+                        connection.disconnect();
 
                     } catch (IOException e) {
                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.connection_error), Toast.LENGTH_SHORT).show();
